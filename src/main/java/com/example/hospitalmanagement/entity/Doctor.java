@@ -29,7 +29,6 @@ public class Doctor {
     private String oAddress;
     private String specialist;
     private String image;
-
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Operation> operations;

@@ -17,6 +17,9 @@ public class OperationServiceImpl implements OperationService {
     @Autowired
     private OperationRepository operationRepository;
 
+    @Autowired
+    private OperationTypeRepository operationTypeRepository;
+
     @Override
     public Operation createOperation(Operation operation) {
         validateOperation(operation); // Validate input before saving
@@ -99,5 +102,63 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
+    @Override
+    public OperationType createOperationType(OperationType operationType) {
+        validateOperationType(operationType);
+        return operationTypeRepository.save(operationType);
+    }
 
+    @Override
+    public Optional<OperationType> getOperationTypeById(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("OperationType ID must be greater than zero.");
+        }
+        return operationTypeRepository.findById(id);
+    }
+
+    @Override
+    public List<OperationType> getAllOperationTypes() {
+        return operationTypeRepository.findAll();
+    }
+
+    @Override
+    public OperationType updateOperationType(Long id, OperationType updatedOperationType) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("OperationType ID must be greater than zero.");
+        }
+        validateOperationType(updatedOperationType);
+
+        return operationTypeRepository.findById(id)
+                .map(existingOperationType -> {
+                    existingOperationType.setName(updatedOperationType.getName());
+                    existingOperationType.setCost(updatedOperationType.getCost());
+                    return operationTypeRepository.save(existingOperationType);
+                })
+                .orElseThrow(() -> new RuntimeException("OperationType not found with ID: " + id));
+    }
+
+    @Override
+    public void deleteOperationType(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("OperationType ID must be greater than zero.");
+        }
+
+        if (!operationTypeRepository.existsById(id)) {
+            throw new RuntimeException("OperationType not found with ID: " + id);
+        }
+
+        operationTypeRepository.deleteById(id);
+    }
+
+    private void validateOperationType(OperationType operationType) {
+        if (operationType == null) {
+            throw new IllegalArgumentException("OperationType object cannot be null.");
+        }
+        if (operationType.getName() == null || operationType.getName().isBlank()) {
+            throw new IllegalArgumentException("OperationType name is required.");
+        }
+        if (operationType.getCost() == null || operationType.getCost() <= 0) {
+            throw new IllegalArgumentException("OperationType cost must be greater than zero.");
+        }
+    }
 }
