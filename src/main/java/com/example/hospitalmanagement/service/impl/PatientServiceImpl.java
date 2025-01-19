@@ -3,6 +3,7 @@ package com.example.hospitalmanagement.service.impl;
 import com.example.hospitalmanagement.entity.Patient;
 import com.example.hospitalmanagement.repository.PatientRepository;
 import com.example.hospitalmanagement.service.PatientService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,7 @@ public class PatientServiceImpl implements PatientService {
                     existingPatient.setEmail(patient.getEmail());
                     existingPatient.setAddress(patient.getAddress());
                     return patientRepository.save(existingPatient);
-                }).orElseThrow(() -> new RuntimeException("Patient not found with ID: " + id));
+                }).orElseThrow(() -> new EntityNotFoundException("Patient not found with ID: " + id));
     }
 
     @Override

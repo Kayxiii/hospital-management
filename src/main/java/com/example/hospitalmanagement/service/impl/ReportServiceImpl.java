@@ -7,6 +7,7 @@ import com.example.hospitalmanagement.repository.ReportTypeRepository;
 import com.example.hospitalmanagement.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,16 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Report createReport(Report report) {
-        validateReport(report); // Validate input before saving
+        if (report.getReportType() != null && report.getReportType().getId() != null) {
+            ReportType reportType = reportTypeRepository.findById(report.getReportType().getId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "ReportType not found with ID: " + report.getReportType().getId()));
+            report.setReportType(reportType);
+        } else {
+            throw new IllegalArgumentException("Valid ReportType ID must be provided.");
+        }
+
+        validateReport(report);
         return reportRepository.save(report);
     }
 
@@ -33,7 +43,16 @@ public class ReportServiceImpl implements ReportService {
             throw new IllegalArgumentException("Report ID must be greater than zero.");
         }
 
-        validateReport(report); // Validate input for updating a report
+        if (report.getReportType() != null && report.getReportType().getId() != null) {
+            ReportType reportType = reportTypeRepository.findById(report.getReportType().getId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "ReportType not found with ID: " + report.getReportType().getId()));
+            report.setReportType(reportType);
+        } else {
+            throw new IllegalArgumentException("Valid ReportType ID must be provided.");
+        }
+
+        validateReport(report);
 
         return reportRepository.findById(id)
                 .map(existingReport -> {
@@ -44,7 +63,7 @@ public class ReportServiceImpl implements ReportService {
                     existingReport.setSize(report.getSize());
                     existingReport.setType(report.getType());
                     return reportRepository.save(existingReport);
-                }).orElseThrow(() -> new RuntimeException("Report not found with ID: " + id));
+                }).orElseThrow(() -> new EntityNotFoundException("Report not found with ID: " + id));
     }
 
     @Override
@@ -135,7 +154,7 @@ public class ReportServiceImpl implements ReportService {
                     existingReportType.setCost(updatedReportType.getCost());
                     return reportTypeRepository.save(existingReportType);
                 })
-                .orElseThrow(() -> new RuntimeException("ReportType not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("ReportType not found with ID: " + id));
     }
 
     @Override

@@ -53,7 +53,7 @@ public class PatientController {
     public ResponseEntity<Object> deletePatient(@PathVariable Long id) {
         try {
             patientService.deletePatient(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Patient deleted successfully.");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

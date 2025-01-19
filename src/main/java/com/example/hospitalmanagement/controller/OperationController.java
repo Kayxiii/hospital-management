@@ -18,11 +18,6 @@ public class OperationController {
 
     // OperationType Endpoints
 
-    @PostMapping("/operationTypes/create")
-    public OperationType createOperationType(@RequestBody OperationType operationType) {
-        return operationService.createOperationType(operationType);
-    }
-
     @GetMapping("/operationTypes/get-all")
     public List<OperationType> getAllOperationTypes() {
         return operationService.getAllOperationTypes();
@@ -35,8 +30,14 @@ public class OperationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/operationTypes/create")
+    public OperationType createOperationType(@RequestBody OperationType operationType) {
+        return operationService.createOperationType(operationType);
+    }
+
     @PutMapping("/operationTypes/update/{id}")
-    public ResponseEntity<OperationType> updateOperationType(@PathVariable Long id, @RequestBody OperationType updatedOperationType) {
+    public ResponseEntity<OperationType> updateOperationType(@PathVariable Long id,
+                                                             @RequestBody OperationType updatedOperationType) {
         try {
             OperationType updated = operationService.updateOperationType(id, updatedOperationType);
             return ResponseEntity.ok(updated);
@@ -49,7 +50,7 @@ public class OperationController {
     public ResponseEntity<Object> deleteOperationType(@PathVariable Long id) {
         try {
             operationService.deleteOperationType(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Operation type deleted successfully.");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -91,7 +92,7 @@ public class OperationController {
     public ResponseEntity<Object> deleteOperation(@PathVariable Long id) {
         try {
             operationService.deleteOperation(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Operation deleted successfully.");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

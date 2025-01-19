@@ -13,12 +13,8 @@ public interface OperationService {
     Operation findOperationById(Long id);
     List<Operation> findAllOperations();
     OperationType createOperationType(OperationType operationType);
-
     Optional<OperationType> getOperationTypeById(Long id);
-
     List<OperationType> getAllOperationTypes();
-
     OperationType updateOperationType(Long id, OperationType updatedOperationType);
-
     void deleteOperationType(Long id);
 }

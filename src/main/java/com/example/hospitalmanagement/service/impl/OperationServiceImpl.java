@@ -1,7 +1,9 @@
 package com.example.hospitalmanagement.service.impl;
 
+import com.example.hospitalmanagement.entity.Doctor;
 import com.example.hospitalmanagement.entity.Operation;
 import com.example.hospitalmanagement.entity.OperationType;
+import com.example.hospitalmanagement.repository.DoctorRepository;
 import com.example.hospitalmanagement.repository.OperationRepository;
 import com.example.hospitalmanagement.repository.OperationTypeRepository;
 import com.example.hospitalmanagement.service.OperationService;
@@ -16,13 +18,23 @@ public class OperationServiceImpl implements OperationService {
 
     @Autowired
     private OperationRepository operationRepository;
-
+    @Autowired
+    private DoctorRepository doctorRepository;
     @Autowired
     private OperationTypeRepository operationTypeRepository;
-
     @Override
     public Operation createOperation(Operation operation) {
-        validateOperation(operation); // Validate input before saving
+        if (operation.getDoctor() != null && operation.getDoctor().getId() != null) {
+            operation.setDoctor(fetchDoctorById(Long.valueOf(operation.getDoctor().getId())));
+        } else {
+            throw new IllegalArgumentException("Valid Doctor ID must be provided.");
+        }
+        if (operation.getOperationType() != null && operation.getOperationType().getId() != null) {
+            operation.setOperationType(fetchOperationTypeById(operation.getOperationType().getId()));
+        } else {
+            throw new IllegalArgumentException("Valid OperationType ID must be provided.");
+        }
+        validateOperation(operation);
         return operationRepository.save(operation);
     }
 
@@ -31,19 +43,27 @@ public class OperationServiceImpl implements OperationService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Operation ID must be greater than zero.");
         }
-
+        if (operation.getDoctor() != null && operation.getDoctor().getId() != null) {
+            operation.setDoctor(fetchDoctorById(Long.valueOf(operation.getDoctor().getId())));
+        } else {
+            throw new IllegalArgumentException("Valid Doctor ID must be provided.");
+        }
+        if (operation.getOperationType() != null && operation.getOperationType().getId() != null) {
+            operation.setOperationType(fetchOperationTypeById(operation.getOperationType().getId()));
+        } else {
+            throw new IllegalArgumentException("Valid OperationType ID must be provided.");
+        }
         validateOperation(operation);
-
         return operationRepository.findById(id)
                 .map(existingOperation -> {
                     existingOperation.setPatient(operation.getPatient());
-                    existingOperation.setOperationType(operation.getOperationType());
                     existingOperation.setDoctor(operation.getDoctor());
+                    existingOperation.setOperationType(operation.getOperationType());
                     existingOperation.setDate(operation.getDate());
                     existingOperation.setTime(operation.getTime());
                     existingOperation.setDescription(operation.getDescription());
                     return operationRepository.save(existingOperation);
-                }).orElseThrow(() -> new RuntimeException("Operation not found"));
+                }).orElseThrow(() -> new RuntimeException("Operation not found with ID: " + id));
     }
 
     @Override
@@ -101,6 +121,17 @@ public class OperationServiceImpl implements OperationService {
             throw new IllegalArgumentException("Operation description is required.");
         }
     }
+    private Doctor fetchDoctorById(Long doctorId) {
+        return doctorRepository.findById(Math.toIntExact(doctorId))
+                .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+    }
+
+    private OperationType fetchOperationTypeById(Long operationTypeId) {
+        return operationTypeRepository.findById(operationTypeId)
+                .orElseThrow(() -> new RuntimeException("OperationType not found with ID: " + operationTypeId));
+    }
+
+
 
     @Override
     public OperationType createOperationType(OperationType operationType) {
